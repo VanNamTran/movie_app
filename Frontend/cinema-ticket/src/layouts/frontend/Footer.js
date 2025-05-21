@@ -35,7 +35,7 @@ const Footer = () => {
           <div className="flex flex-col items-center md:items-start">
             <h3 className="text-xl font-semibold mb-4">Liên Kết</h3>
             <ul className="space-y-4">
-              <li><a href="/" className="hover:text-yellow-400">Về Chúng Tôi</a></li>
+              {/* <li><a href="/" className="hover:text-yellow-400">Về Chúng Tôi</a></li> */}
               <li><a href="/" className="hover:text-yellow-400">Chính Sách Bảo Mật</a></li>
               <li><a href="/" className="hover:text-yellow-400">Điều Khoản Dịch Vụ</a></li>
               <li><a href="/" className="hover:text-yellow-400">Hỗ Trợ</a></li>
