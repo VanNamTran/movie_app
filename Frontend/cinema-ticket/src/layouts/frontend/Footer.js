@@ -25,10 +25,10 @@ const Footer = () => {
 
           {/* Logo và thông tin rạp */}
           <div className="flex flex-col items-center md:items-start">
-            {/* <img src="/images/TH.jpg" alt="Logo" className="w-32 mb-4" />
+            <img src="/images/TH.jpg" alt="Logo" className="w-32 mb-4" />
             <p className="text-sm mb-2">Công Ty Phim</p>
             <p className="text-sm">Hotline: 0378 804 171</p>
-            <p className="text-sm">Email: caosonlam3003@gmail.com</p> */}
+            <p className="text-sm">Email: caosonlam3003@gmail.com</p>
           </div>
 
           {/* Liên kết trang */}
