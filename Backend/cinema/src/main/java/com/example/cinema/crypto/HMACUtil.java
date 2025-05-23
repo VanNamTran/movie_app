@@ -3,8 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.example.cinema.zalopay.crypto;
-
+package com.example.cinema.crypto;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -57,9 +56,9 @@ public class HMACUtil {
      *
      * @param algorithm A cryptographic hash function (such as MD5 or SHA-1)
      *
-     * @param key A secret cryptographic key
+     * @param key       A secret cryptographic key
      *
-     * @param data The message to be authenticated
+     * @param data      The message to be authenticated
      *
      * @return Base64-encoded HMAC String
      */
@@ -79,9 +78,9 @@ public class HMACUtil {
      *
      * @param algorithm A cryptographic hash function (such as MD5 or SHA-1)
      *
-     * @param key A secret cryptographic key
+     * @param key       A secret cryptographic key
      *
-     * @param data The message to be authenticated
+     * @param data      The message to be authenticated
      *
      * @return Hex HMAC String
      */

@@ -30,18 +30,12 @@ public class JWTFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
 
-        String path = request.getServletPath();
-
-        // Bỏ qua các path public, không check JWT
-        if (path.startsWith("/api/auth") || path.startsWith("/api/payment")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
+        // Lấy token từ header Authorization
         final String authHeader = request.getHeader("Authorization");
         String token = null;
         String email = null;
 
+        // Kiểm tra nếu header chứa Bearer token
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
             email = jwtUtil.extractUsername(token);

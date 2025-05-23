@@ -33,6 +33,13 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    
+    @GetMapping("/tettet")
+      public ResponseEntity<String> returnPaymentestt() {
+        return "Okene";
+    }
+
+
     @Value("${upload.path}")
     private String uploadDir;
 

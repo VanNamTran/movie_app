@@ -1,89 +1,101 @@
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
+package com.example.cinema.controller;
 
+import com.example.cinema.config.ZaloPayConfig;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.io.OutputStream;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @RestController
 @RequestMapping("/api/payment")
-public class ZaloPayController {
+public class PaymentController {
 
     @Autowired
     private ZaloPayConfig zaloPayConfig;
 
-    @PostMapping("/zalopay")
-    public Map<String, Object> createZaloPayOrder(@RequestBody Map<String, Object> payload) {
-        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            Random rnd = new Random();
-            String app_trans_id = new SimpleDateFormat("yyMMdd").format(new Date()) + "_" + (rnd.nextInt(1000000));
+    @PostMapping("/create-order")
+    public ResponseEntity<?> createOrder(@RequestParam long amount) {
+        try {
+            String app_id = zaloPayConfig.getAppId();
+            String key1 = zaloPayConfig.getKey1();
+            String endpoint = zaloPayConfig.getEndpoint();
+
+            String app_trans_id = new java.text.SimpleDateFormat("yyMMddHHmmss").format(new Date()) + "_" + new Random().nextInt(1000000);
+            String app_user = "demo_user";
             long app_time = System.currentTimeMillis();
-
-            // Lấy dữ liệu từ payload
-            String app_user = (String) payload.get("userId");
-            Integer amountObj = (Integer) payload.get("amount");
-            String description = (String) payload.get("description");
-
-            if (app_user == null || amountObj == null || description == null) {
-                return Map.of("status", "error", "message", "Missing required fields: userId, amount, description");
-            }
-
-            long amount = amountObj;
-
-            String embed_data = "{\"preferred_payment_method\":[\"international_card\"],\"redirecturl\":\"http://localhost:5173/payment-result?paymentMethod=zalopay\"}";
+            String embed_data = "{}";
             String item = "[]";
+            String description = "Thanh toán đơn hàng #" + app_trans_id;
 
-            // Tạo chuỗi dữ liệu cho MAC theo đúng thứ tự
-            String data = String.join("|",
-                    zaloPayConfig.appId,
-                    app_trans_id,
-                    app_user,
-                    String.valueOf(amount),
-                    String.valueOf(app_time),
-                    embed_data,
-                    item
-            );
+            // Tạo chuỗi data theo định dạng ZaloPay yêu cầu
+            String data = app_id + "|" + app_trans_id + "|" + app_user + "|" + amount + "|" + app_time + "|" + embed_data + "|" + item;
+            String mac = hmacSHA256(key1, data);
 
-            // Tính mac bằng HMAC SHA256
-            String mac = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, zaloPayConfig.key1, data);
+            // Log để debug nếu cần
+            System.out.println("Data: " + data);
+            System.out.println("MAC: " + mac);
 
-            // Tạo danh sách params gửi theo form-urlencoded
-            List<NameValuePair> params = new ArrayList<>();
-            params.add(new BasicNameValuePair("app_id", zaloPayConfig.appId));
-            params.add(new BasicNameValuePair("app_trans_id", app_trans_id));
-            params.add(new BasicNameValuePair("app_user", app_user));
-            params.add(new BasicNameValuePair("app_time", String.valueOf(app_time)));
-            params.add(new BasicNameValuePair("amount", String.valueOf(amount)));
-            params.add(new BasicNameValuePair("embed_data", embed_data));
-            params.add(new BasicNameValuePair("item", item));
-            params.add(new BasicNameValuePair("description", description));
-            params.add(new BasicNameValuePair("bank_code", ""));
-            params.add(new BasicNameValuePair("callback_url", zaloPayConfig.callbackUrl));
-            params.add(new BasicNameValuePair("mac", mac));
+            // Tạo JSON request
+            JSONObject json = new JSONObject();
+            json.put("app_id", app_id);
+            json.put("app_trans_id", app_trans_id);
+            json.put("app_user", app_user);
+            json.put("app_time", app_time);
+            json.put("amount", amount);
+            json.put("item", item);
+            json.put("description", description);
+            json.put("embed_data", embed_data);
+            json.put("mac", mac);
 
-            HttpPost post = new HttpPost(zaloPayConfig.endpoint);
-            post.setEntity(new UrlEncodedFormEntity(params, StandardCharsets.UTF_8));
-            post.setHeader("Content-Type", "application/x-www-form-urlencoded");
-            post.setHeader("User-Agent", "Mozilla/5.0");
+            // Gửi HTTP POST đến ZaloPay
+            URL url = new URL(endpoint);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setDoOutput(true);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 
-            try (CloseableHttpResponse response = httpClient.execute(post)) {
-                String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-                return Map.of("status", "success", "data", responseBody);
-            }
+            String postData = "data=" + json.toString();
+            System.out.println("Post Data: " + postData);
+
+            OutputStream os = conn.getOutputStream();
+            os.write(postData.getBytes(StandardCharsets.UTF_8));
+            os.flush();
+
+            // Đọc phản hồi
+            InputStream is = conn.getInputStream();
+            Scanner scanner = new Scanner(is, "UTF-8").useDelimiter("\\A");
+            String response = scanner.hasNext() ? scanner.next() : "";
+
+            System.out.println("ZaloPay Response: " + response);
+
+            JSONObject responseObject = new JSONObject(response);
+            return ResponseEntity.ok(responseObject.toMap());
+
         } catch (Exception e) {
             e.printStackTrace();
-            return Map.of("status", "error", "message", e.getMessage());
+
+            return ResponseEntity.status(500).body(Collections.singletonMap("error", e.getMessage()));
         }
     }
 
-     @GetMapping("/test")
-    public ResponseEntity<String> test() {
-        return ResponseEntity.ok("Test API is working!");
+    private String hmacSHA256(String key, String data) throws Exception {
+        SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(secretKeySpec);
+        byte[] bytes = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
+        StringBuilder hash = new StringBuilder();
+        for (byte b : bytes) {
+            hash.append(String.format("%02x", b));
+        }
+        return hash.toString();
     }
 }

@@ -5,18 +5,32 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class ZaloPayConfig {
+
     @Value("${zalopay.app_id}")
-    public String appId;
+    private String appId;
 
     @Value("${zalopay.key1}")
-    public String key1;
+    private String key1;
 
     @Value("${zalopay.key2}")
-    public String key2;
+    private String key2;
 
     @Value("${zalopay.endpoint}")
-    public String endpoint;
+    private String endpoint;
 
-    @Value("${zalopay.callback_url}")
-    public String callbackUrl;
+    public String getAppId() {
+        return appId;
+    }
+
+    public String getKey1() {
+        return key1;
+    }
+
+    public String getKey2() {
+        return key2;
+    }
+
+    public String getEndpoint() {
+        return endpoint;
+    }
 }
