@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const SEAT_PRICE = 45000;
@@ -33,6 +33,11 @@ const SeatSelection = () => {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const movieName = selectedMovie.title;
+
+    const seatKey = `paidSeats_${selectedMovie.id}`;
+    const paidSeatData = JSON.parse(localStorage.getItem(seatKey)) || {};
+    const allPaidSeats = Object.values(paidSeatData).flat();
+    const isSeatPaid = (seat) => allPaidSeats.includes(seat);
 
     useEffect(() => {
         const allBookings = JSON.parse(localStorage.getItem('bookedSeatsByUser')) || {};
@@ -74,10 +79,10 @@ const SeatSelection = () => {
             const intervalId = setInterval(() => {
                 setRemainingTime((prev) => {
                     const newTime = prev - 1;
-                    localStorage.setItem('remainingTime', newTime); // Lưu thời gian còn lại vào localStorage
+                    localStorage.setItem('remainingTime', newTime);
                     if (newTime <= 0) {
                         handleCancelSeats(selectedSeats);
-                        return 0; // Đặt lại thời gian còn lại về 0
+                        return 0;
                     }
                     return newTime;
                 });
@@ -131,11 +136,11 @@ const SeatSelection = () => {
 
             // Thiết lập thời gian chờ 1 phút
             if (timeoutId) {
-                clearTimeout(timeoutId); // Xóa thời gian chờ cũ nếu có
+                clearTimeout(timeoutId);
             }
             const timeLimit = 15;
             setRemainingTime(timeLimit);
-            localStorage.setItem('remainingTime', timeLimit); 
+            localStorage.setItem('remainingTime', timeLimit);
             const id = setTimeout(() => {
                 handleCancelSeats(selectedSeats);
             }, timeLimit * 1000);
@@ -148,11 +153,11 @@ const SeatSelection = () => {
     const handleCancelSeats = (seats) => {
         const updatedBookedSeats = bookedSeats.filter(seat => !seats.includes(seat));
         setBookedSeats(updatedBookedSeats);
-        setSelectedSeats([]); // Xóa ghế đã chọn
+        setSelectedSeats([]);
         alert("Thời gian đặt vé đã hết. Ghế đã được hủy.");
-        setRemainingTime(0); // Đặt lại thời gian còn lại
-        localStorage.removeItem('remainingTime'); // Xóa thời gian còn lại khỏi localStorage
-        localStorage.removeItem(`selectedSeats_${currentUser}_${selectedShowTime}`); // Xóa ghế đã chọn khỏi localStorage
+        setRemainingTime(0);
+        localStorage.removeItem('remainingTime');
+        localStorage.removeItem(`selectedSeats_${currentUser}_${selectedShowTime}`);
     };
 
     const handleGuestInfoChange = (e) => {
@@ -172,10 +177,10 @@ const SeatSelection = () => {
         else {
             // saveBooking(currentUser);
             navigate(`/checkout?movie=${selectedMovie.title}&seats=${selectedSeats.join(",")}`);
-            clearTimeout(timeoutId); // Xóa thời gian chờ khi đặt vé thành công
-            setRemainingTime(0); // Đặt lại thời gian còn lại
-            localStorage.removeItem('remainingTime'); // Xóa thời gian còn lại khỏi localStorage
-            localStorage.removeItem(`selectedSeats_${currentUser}_${selectedShowTime}`); // Xóa ghế đã chọn khỏi localStorage
+            clearTimeout(timeoutId);
+            setRemainingTime(0);
+            localStorage.removeItem('remainingTime');
+            localStorage.removeItem(`selectedSeats_${currentUser}_${selectedShowTime}`);
         }
     };
 
@@ -241,7 +246,7 @@ const SeatSelection = () => {
     return (
         <div className="min-h-screen p-4 bg-gradient-to-br from-black via-blue-600/20 to-black bg-opacity-90 backdrop-blur-sm text-white">
             <h2 className="text-2xl font-bold text-center text-white mb-4">
-                Chọn ghế cho phim: 
+                Chọn ghế cho phim:
                 <span className="bg-gradient-to-r from-red-500 text-red-500 bg-clip-text">
                     {movieTitle}
                 </span>
@@ -266,10 +271,10 @@ const SeatSelection = () => {
 
                 {/* Hình ảnh cửa nhỏ */}
                 <div className="absolute top-1/4 right-80 flex flex-col items-center">
-                    <img 
-                        src="/images/C1.png" 
-                        alt="Cửa" 
-                        className="w-10 h-10 transform -translate-y-3 filter brightness-150 contrast-125 hue-rotate-180 drop-shadow-lg rounded-lg" 
+                    <img
+                        src="/images/C1.png"
+                        alt="Cửa"
+                        className="w-10 h-10 transform -translate-y-3 filter brightness-150 contrast-125 hue-rotate-180 drop-shadow-lg rounded-lg"
                     />
                     <span className="mt-1 text-white text-sm font-semibold bg-opacity-50 px-2 py-0.5 rounded">
                         Cửa
@@ -334,7 +339,7 @@ const SeatSelection = () => {
                                                 )}
                                             </div>
                                         );
-                                    })} 
+                                    })}
                                 </div>
                             );
                         }
@@ -350,11 +355,11 @@ const SeatSelection = () => {
                                     const isUserBooked = userBookedSeats.includes(seatId);
 
                                     let seatColor = 'bg-gray-200 text-black';
-                                    
+
                                     if (bookedSeats.includes(seatId)) {
                                         seatColor = 'bg-red-500 text-white cursor-not-allowed';
                                     }
-                                    if (isSelected) seatColor = 'bg-yellow-500 text-black'; 
+                                    if (isSelected) seatColor = 'bg-yellow-500 text-black';
 
                                     return (
                                         <div key={seatId} className="relative">
@@ -370,7 +375,7 @@ const SeatSelection = () => {
                                                 <button
                                                     onClick={() => {
                                                         handleCancelSeat(seatId);
-                                                        setSelectedSeats((prev) => prev.filter((id) => id !== seatId)); 
+                                                        setSelectedSeats((prev) => prev.filter((id) => id !== seatId));
                                                     }}
                                                     className="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs px-1 py-0.5 rounded-full hover:bg-yellow-600"
                                                 >
@@ -396,7 +401,7 @@ const SeatSelection = () => {
             </div>
 
             {/* Hiển thị thời gian còn lại */}
-            {remainingTime > 0 && currentUser && ( 
+            {remainingTime > 0 && currentUser && (
                 <div className="text-center text-lg font-semibold mb-4">
                     Thời gian còn lại để đặt vé: {formatTime(remainingTime)}
                 </div>
@@ -441,156 +446,5 @@ const SeatSelection = () => {
     );
 };
 
-export default SeatSelection; 
-
-
-
-
-
-// import React, { useEffect, useState } from 'react';
-// import axios from 'axios';
-
-// const ROWS = ['A', 'B', 'C', 'D', 'E', 'F'];
-// const COLUMNS = 10;
-
-// const SeatSelection = ({ movieId, userEmail }) => {
-//   const [bookedSeats, setBookedSeats] = useState([]); // đã đặt (chưa thanh toán)
-//   const [paidSeats, setPaidSeats] = useState([]);     // đã thanh toán
-//   const [selectedSeats, setSelectedSeats] = useState([]);
-//   const [ticketPrice, setTicketPrice] = useState(0);  // giá vé động
-//   const [movieName, setMovieName] = useState('');
-
-//   useEffect(() => {
-//     if (movieId) {
-//       fetchMovieInfo();
-//       fetchSeatsFromBackend();
-//     }
-//   }, [movieId]);
-
-//   // Lấy thông tin phim từ backend để lấy giá vé và tên phim
-//   const fetchMovieInfo = async () => {
-//     try {
-//       const response = await axios.get(`/api/movies/${movieId}`);
-//       const movie = response.data;
-
-//       setTicketPrice(movie.price || 0);
-//       setMovieName(movie.name || '');
-//     } catch (error) {
-//       console.error('Lỗi khi lấy thông tin phim:', error);
-//     }
-//   };
-
-//   // Lấy trạng thái ghế từ backend
-//   const fetchSeatsFromBackend = async () => {
-//     try {
-//       const response = await axios.get(`/api/seats?movieId=${movieId}`);
-//       const data = response.data;
-
-//       setBookedSeats(data.booked || []);
-//       setPaidSeats(data.paid || []);
-//     } catch (error) {
-//       console.error('Lỗi khi lấy dữ liệu ghế từ backend:', error);
-//     }
-//   };
-
-//   const generateSeatLabel = (row, col) => `${row}${col}`;
-
-//   const handleSeatClick = (seatLabel) => {
-//     if (paidSeats.includes(seatLabel) || bookedSeats.includes(seatLabel)) return;
-
-//     if (selectedSeats.includes(seatLabel)) {
-//       setSelectedSeats(selectedSeats.filter(seat => seat !== seatLabel));
-//     } else {
-//       setSelectedSeats([...selectedSeats, seatLabel]);
-//     }
-//   };
-
-//   const handleBooking = async () => {
-//     if (!userEmail) {
-//       alert("Vui lòng đăng nhập để đặt vé.");
-//       return;
-//     }
-
-//     try {
-//       await axios.post('/api/seats/book', {
-//         movieId,
-//         email: userEmail,
-//         seats: selectedSeats,
-//       });
-
-//       alert("Đặt ghế thành công!");
-//       setSelectedSeats([]);
-//       fetchSeatsFromBackend(); // refresh lại trạng thái ghế
-//     } catch (err) {
-//       console.error('Lỗi đặt vé:', err);
-//       alert("Lỗi đặt ghế. Vui lòng thử lại.");
-//     }
-//   };
-
-//   const getSeatStatus = (seatLabel) => {
-//     if (paidSeats.includes(seatLabel)) return 'paid';
-//     if (bookedSeats.includes(seatLabel)) return 'booked';
-//     if (selectedSeats.includes(seatLabel)) return 'selected';
-//     return 'available';
-//   };
-
-//   return (
-//     <div className="p-4">
-//       <h2 className="text-xl font-semibold mb-4">Chọn ghế cho phim: {movieName}</h2>
-
-//       <div className="grid grid-cols-10 gap-2">
-//         {ROWS.map((row) =>
-//           [...Array(COLUMNS)].map((_, colIndex) => {
-//             const seatLabel = generateSeatLabel(row, colIndex + 1);
-//             const status = getSeatStatus(seatLabel);
-
-//             let seatColor = 'bg-gray-300';
-//             if (status === 'selected') seatColor = 'bg-yellow-400';
-//             else if (status === 'booked') seatColor = 'bg-blue-400';
-//             else if (status === 'paid') seatColor = 'bg-red-500';
-
-//             return (
-//               <button
-//                 key={seatLabel}
-//                 onClick={() => handleSeatClick(seatLabel)}
-//                 disabled={status === 'booked' || status === 'paid'}
-//                 className={`w-10 h-10 rounded ${seatColor} border border-gray-600 hover:brightness-110`}
-//                 title={seatLabel}
-//               >
-//                 {seatLabel}
-//               </button>
-//             );
-//           })
-//         )}
-//       </div>
-
-//       <div className="mt-4">
-//         <p>Ghế đã chọn: {selectedSeats.join(', ') || 'Chưa chọn'}</p>
-//         <p>Tổng tiền: {selectedSeats.length * ticketPrice} VND</p>
-//         <button
-//           className="mt-2 px-4 py-2 bg-green-500 text-white rounded"
-//           onClick={handleBooking}
-//         >
-//           Đặt vé
-//         </button>
-//       </div>
-
-//       <div className="mt-4">
-//         <h3 className="text-md font-semibold">Ghi chú màu:</h3>
-//         <div className="flex space-x-4 mt-2">
-//           <div className="flex items-center space-x-2"><div className="w-4 h-4 bg-gray-300 border" /> <span>Trống</span></div>
-//           <div className="flex items-center space-x-2"><div className="w-4 h-4 bg-yellow-400 border" /> <span>Đang chọn</span></div>
-//           <div className="flex items-center space-x-2"><div className="w-4 h-4 bg-blue-400 border" /> <span>Đã đặt</span></div>
-//           <div className="flex items-center space-x-2"><div className="w-4 h-4 bg-red-500 border" /> <span>Đã thanh toán</span></div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default SeatSelection;
-
-
-
-
+export default SeatSelection;
 
