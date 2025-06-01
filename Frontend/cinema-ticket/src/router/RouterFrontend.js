@@ -5,19 +5,21 @@ import Login from "../pages/frontend/auth/Login";
 import Register from "../pages/frontend/auth/Register";
 import SeatSelection from "../pages/frontend/seat/SeatSelection";
 import CheckoutPage from "../pages/pay/CheckoutPage";
-import QRCodePage from "../pages/pay/QRCodePage";
 import BookingPage from './../pages/frontend/home/product/BookingPage';
+import CheckoutAuthPage from "../pages/pay/CheckoutAuthPage";
+import PaymentSuccessPage from './../pages/pay/PaymentSuccessPage';
 
 const RouterFrontend = [
-  { path: "/", element: <Home /> }, 
-  { path: "/Promotion", element: <Promotion /> }, 
+  { path: "/", element: <Home /> },
+  { path: "/Promotion", element: <Promotion /> },
   { path: "/Event", element: <Event /> },
   { path: "/Login", element: <Login /> },
   { path: "/Register", element: <Register /> },
   { path: "/SeatSelection", element: <SeatSelection /> },
   { path: "/checkout", element: <CheckoutPage /> },
-  { path: "/qr-code", element: <QRCodePage /> },
-  { path: "/booking/:id", element: <BookingPage  /> },
+  { path: "/checkout-auth", element: <CheckoutAuthPage /> },
+  { path: "/booking/:id", element: <BookingPage /> },
+  { path: "/payment-success", element: <PaymentSuccessPage /> },
 ];
 
 export default RouterFrontend;
