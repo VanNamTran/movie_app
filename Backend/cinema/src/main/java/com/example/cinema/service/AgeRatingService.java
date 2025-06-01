@@ -15,12 +15,4 @@ public interface AgeRatingService {
     AgeRating updateAgeRating(Long id, AgeRating ageRating);
 
     void deleteAgeRating(Long id);
-
-    void softDeleteAgeRating(Long id);
-
-    void restoreAgeRating(Long id);
-
-    void destroyAgeRating(Long id);
-
-    List<AgeRating> getTrashedAgeRatings();
 }

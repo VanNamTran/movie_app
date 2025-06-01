@@ -61,9 +61,7 @@ public class AuthController {
 
             // Thiết lập các trường mặc định
             user.setCreatedAt(new Date());
-            if (user.getRole() == null || user.getRole().isBlank()) {
-                user.setRole("USER");
-            }
+            user.setRole("USER");
             user.setStatus(1);
             user.setImage("user-uploads/" + fileName);
 
