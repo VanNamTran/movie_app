@@ -29,7 +29,20 @@ public class JWTFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
+        String path = request.getRequestURI();
 
+        // ✅ Bỏ qua kiểm tra token nếu là endpoint public
+        if (path.startsWith("/api/auth") ||
+                path.startsWith("/api/redis/test") ||
+                path.startsWith("/api/seats") ||
+                path.startsWith("/api/genres") ||
+                path.startsWith("/api/age-ratings") ||
+                path.startsWith("/api/countries") ||
+                path.startsWith("/api/movies") ||
+                path.startsWith("/api/branches")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         // Lấy token từ header Authorization
         final String authHeader = request.getHeader("Authorization");
         String token = null;

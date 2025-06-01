@@ -1,5 +1,6 @@
 package com.example.cinema.entity;
 
+
 import jakarta.persistence.*;
 import java.util.Date;
 
@@ -144,4 +145,5 @@ public class SeatBooking {
     public void setUpdated_at(Date updated_at) {
         this.updated_at = updated_at;
     }
+
 }

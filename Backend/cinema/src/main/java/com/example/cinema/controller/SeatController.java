@@ -1,5 +1,6 @@
 package com.example.cinema.controller;
 
+
 import com.example.cinema.dto.request.SeatDTO;
 import com.example.cinema.dto.request.SeatReservationRequest;
 import com.example.cinema.entity.Seat;
@@ -70,4 +71,5 @@ public class SeatController {
             return ResponseEntity.status(500).body("Lỗi khi tạo ghế: " + e.getMessage());
         }
     }
+
 }
